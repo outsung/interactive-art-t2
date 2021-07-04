@@ -1,14 +1,14 @@
-import React, { Suspense, useRef, useState, useEffect, useMemo } from 'react';
-import * as THREE from 'three';
-import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
-import { Stars } from '@react-three/drei';
+import React, { Suspense, useRef, useState, useMemo } from 'react';
+// import * as THREE from 'three';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+// import { Stars } from '@react-three/drei';
 import { TextureLoader } from 'three/src/loaders/TextureLoader.js';
 
 import Controls from '../Controls';
 
 import { useSpring, a } from "@react-spring/three";
 
-import { LanternOfGLTF, Effects, useSkybox, SelectiveEffects } from '../App'
+import { LanternOfGLTF, Effects, useSkybox } from '../App'
 
 export const Background = () => {
   const texture = useLoader(TextureLoader, './background.jpg');
