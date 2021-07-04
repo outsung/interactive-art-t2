@@ -28,9 +28,9 @@ jobs:
       - name: A) Build
         run: npm run build
 
-      - name: B) Deploy
+      - name: B) Deploy on main
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{secrets.GH_PAT}}
-          publish_branch: deploy
+          publish_branch: main
           publish_dir: ./build
