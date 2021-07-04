@@ -1,0 +1,36 @@
+name: Master Deploy
+on:
+  push:
+    branches:
+      - master
+jobs:
+  Dev_Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Set up Node.js
+        uses: actions/setup-node@master
+        with:
+          node-version: 12.x
+
+      - name: Cache node_modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{runner.OS}}-build-${{hashFiles('**/yarn.lock')}}
+          restore-keys: |
+            ${{ runner.OS }}-build-${{ runner.OS }}-
+
+      - name: Install dependencies
+        run: npm install --prod --pure-lockfile
+
+      - name: A) Build
+        run: npm run build
+
+      - name: B) Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{secrets.GH_PAT}}
+          publish_branch: deploy
+          publish_dir: ./build
