@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useState, useMemo, useEffect } from 'react';
+import React, { Suspense, useRef, useState, useMemo, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 // import { Stars } from '@react-three/drei';
@@ -104,12 +104,19 @@ function AnimationBox({ d, t, children }) {
 //     );
 // }
 
+const getLenterns = () => {
+  return <LanternOfGLTF x={Math.floor(Math.random() * 100)} y={Math.floor(Math.random() * 30)} z={Math.floor(Math.random() * 100 - 50)} url="./lantern.glb"/>
+}
 
 function Scene() {
-  const [count, setCount] = useState(3);
-  
+  const [Lenterns, setLenterns] = useState([getLenterns(), getLenterns(), getLenterns()]);
+
+  const addLenterns = useCallback(() => {
+    setLenterns(prev => [...prev, getLenterns()]);
+  }, []);
+
   useSkybox();
-  
+
   return (
     <>
       <pointLight position={[0, -10, 0]} intensity={1.5} />
@@ -118,15 +125,10 @@ function Scene() {
 
         {/* <Bloom f={3}> */}
           <AnimationBox  t={3000} d={0.1}>
-            {
-              // x = -50 ~ 50, y = -30 ~ 30, z = -100 ~ 10
-              Array.from(new Array(count)).map(() => {
-                return <LanternOfGLTF x={Math.floor(Math.random() * 100)} y={Math.floor(Math.random() * 30)} z={Math.floor(Math.random() * 100 - 50)} url="./lantern.glb"/>
-              })
-            }
+          {Lenterns}
           </AnimationBox>
           <pointLight position={[0, -4, 10]} intensity={1.5} />
-          <MainLentern setCount={setCount} x={-4} y={-2} z={52} />
+          {useMemo(() => <MainLentern addLenterns={addLenterns} x={-4} y={-2} z={52} />, [])}
             
         {/* </Bloom> */}
       </Suspense>
@@ -163,66 +165,49 @@ function easeInOutSine(x) {
   return -(Math.cos(Math.PI * x) - 1) / 2;
 }
 
-function MainLentern ({ setCount, x, y, z }) {
-  const [isClick, setIsClick] = useState(false);
+function MainLentern ({ addLenterns, x, y, z }) {
   const [intensity, setIntensity] = useState(0);
   const ref = useRef();
-  const closeTimeoutRef = useRef();
+  const closeTimeoutRef = useRef([]);
+
 
   const checkPoint1 = useSpringRef();
-  const { lenternPosition1, cameraPosition1 } = useSpring({
-    lenternPosition1: isClick ? [30, 27, -5] : [0, 0, 0],
-    cameraPosition1: isClick ? [20, 23, 0] : [0, 0, 0],
-    config: { duration: 7000, easing: easeInSine },
+  const [{ lenternPosition1, cameraPosition1 }, checkPointAPI1] = useSpring(() => ({
+    lenternPosition1: [0, 0, 0],
+    cameraPosition1: [0, 0, 0],
     ref: checkPoint1,
-  });
-
+  }));
   const checkPoint2 = useSpringRef();
-  const { lenternPosition2, cameraPosition2, cameraLookAt2 } = useSpring({
-    lenternPosition2: isClick ? [15, 12, -15] : [0, 0, 0],
-    cameraPosition2: isClick ? [2, 5, 0] : [0, 0, 0],
-    cameraLookAt2: isClick ? [0, 3, 0] : [0, 0, 0],
-    config: { duration: 5000 },
+  const [{ lenternPosition2, cameraPosition2, cameraLookAt2 }, checkPointAPI2] = useSpring(() => ({
+    lenternPosition2: [0, 0, 0],
+    cameraPosition2: [0, 0, 0],
+    cameraLookAt2: [0, 0, 0],
     ref: checkPoint2,
-  });
-  
-
+  }));
   const checkPoint3 = useSpringRef();
-  const { lenternPosition3, cameraPosition3, cameraLookAt3 } = useSpring({
-    lenternPosition3: isClick ? [19, 14, -20] : [0, 0, 0],
-    cameraPosition3: isClick ? [0, 0, 0] : [0, 0, 0],
-    cameraLookAt3: isClick ? [0, 2, 0] : [0, 0, 0],
-    config: { duration: 5000, easeOutSine },
+  const [{ lenternPosition3, cameraPosition3, cameraLookAt3 }, checkPointAPI3] = useSpring(() => ({
+    lenternPosition3: [0, 0, 0],
+    cameraPosition3: [0, 0, 0],
+    cameraLookAt3: [0, 0, 0],
     ref: checkPoint3,
-  });
-
+  }));
   const checkPoint4 = useSpringRef();
-  const { cameraPosition4, cameraLookAt4 } = useSpring({
-    cameraPosition4: isClick ? [-22, -28, 0] : [0, 0, 0],
-    cameraLookAt4: isClick ? [0, -5, 0] : [0, 0, 0],
-    config: { duration: 7000, easing: easeOutSine },
+  const [{ cameraPosition4, cameraLookAt4 }, checkPointAPI4] = useSpring(() => ({
+    cameraPosition4: [0, 0, 0],
+    cameraLookAt4: [0, 0, 0],
     ref: checkPoint4,
-  });
-
-  // x : 30 + 15 + 19 = 64
-  // y : 27 + 12 + 14 = 53
-  // z : -5 + -15 + -20 = 40
+  }));
   const checkPoint5 = useSpringRef();
-  const { lenternPosition5 } = useSpring({
-    lenternPosition5: isClick ? [-64, -58, 30] : [0, 0, 0],
-    config: { duration: 1 },
+  const [{ lenternPosition5 }, checkPointAPI5] = useSpring(() => ({
+    lenternPosition5: [0, 0, 0],
     ref: checkPoint5,
-  });
-
+  }));
   const checkPoint6 = useSpringRef();
-  const { lenternPosition6 } = useSpring({
-    lenternPosition6: isClick ? [0, 5, 10] : [0, 0, 0],
-    config: { duration: 5000, easing: easeInOutSine },
+  const [{ lenternPosition6 }, checkPointAPI6] = useSpring(() => ({
+    lenternPosition6: [0, 0, 0],
     ref: checkPoint6,
-  });
-  
-  useChain([checkPoint1, checkPoint2, checkPoint3, checkPoint4, checkPoint5, checkPoint6], [0, 7, 12, 19, 22, 24]);
-  
+  }));
+    
   useFrame((state) => {
     // x =  y={-2} z={52
     const [l_x1, l_y1, l_z1] = lenternPosition1.get();
@@ -253,18 +238,105 @@ function MainLentern ({ setCount, x, y, z }) {
   });
 
   useEffect(() => () => {
-    closeTimeoutRef.current && closeTimeoutRef.current();
-  })
+    closeTimeoutRef.current.map(close => close && close.current());
+  }, [])
+
+  const animationStart = async () => {
+    // useChain([checkPoint1, checkPoint2, checkPoint3, checkPoint4, checkPoint5, checkPoint6], [0, 7, 12, 19, 22, 24]);
+
+    checkPointAPI1(() => ({
+      lenternPosition1: [30, 27, -5],
+      cameraPosition1: [20, 23, 0],
+      config: { duration: 7000, easing: easeInSine },
+    }));
+    closeTimeoutRef.current[0] = setTimeout(() => {
+      checkPointAPI2({
+        lenternPosition2: [15, 12, -15],
+        cameraPosition2: [2, 5, 0],
+        cameraLookAt2: [0, 3, 0],
+        config: { duration: 5000 },
+      });
+    }, 7000);
+    closeTimeoutRef.current[1] = setTimeout(() => {
+      checkPointAPI3({
+        lenternPosition3: [19, 14, -20],
+        cameraPosition3: [0, 0, 0],
+        cameraLookAt3: [0, 2, 0],
+        config: { duration: 5000, easing: easeOutSine },
+      });
+    }, 12000);
+    closeTimeoutRef.current[2] = setTimeout(() => {
+      checkPointAPI4({
+        cameraPosition4: [-22, -28, 0],
+        cameraLookAt4: [0, -5, 0],
+        config: { duration: 7000, easing: easeInOutSine },
+      });
+    }, 19000);
+    closeTimeoutRef.current[3] = setTimeout(() => {
+      // x : 30 + 15 + 19 = 64
+      // y : 27 + 12 + 14 = 53
+      // z : -5 + -15 + -20 = 40
+      checkPointAPI5({
+        lenternPosition5: [-64, -58, 30],
+        config: { duration: 1 },
+      });
+    }, 22000);
+    closeTimeoutRef.current[4] = setTimeout(() => {
+      checkPointAPI6({
+        lenternPosition6: [0, 5, 10],
+        config: { duration: 5000, easing: easeInOutSine },
+      });
+    }, 24000);
+    
+    closeTimeoutRef.current[5] = setTimeout(() => {
+      animationReset();
+    }, 30000)
+  }
+
+  const animationReset = async () => {
+    checkPointAPI1(() => ({
+      lenternPosition1: [0, 0, 0],
+      cameraPosition1: [0, 0, 0],
+      config: { duration: 1 },
+    }));
+    checkPointAPI2({
+      lenternPosition2: [0, 0, 0],
+      cameraPosition2: [0, 0, 0],
+      cameraLookAt2: [0, 0, 0],
+      config: { duration: 1 },
+    });
+    checkPointAPI3({
+      lenternPosition3: [0, 0, 0],
+      cameraPosition3: [0, 0, 0],
+      cameraLookAt3: [0, 0, 0],
+      config: { duration: 1 },
+    });
+    checkPointAPI4({
+      cameraPosition4: [0, 0, 0],
+      cameraLookAt4: [0, 0, 0],
+      config: { duration: 1 },
+    });
+    
+    // x : 30 + 15 + 19 = 64
+    // y : 27 + 12 + 14 = 53
+    // z : -5 + -15 + -20 = 40
+    checkPointAPI5({
+      lenternPosition5: [0, 0, 0],
+      config: { duration: 1 },
+    });
+    checkPointAPI6({
+      lenternPosition6: [0, 0, 0],
+      config: { duration: 1 },
+    });
+    
+    addLenterns();
+  }
 
 
   return (
     <mesh ref={ref} onClick={() => {
-      // setIntensity(intensity + 0.1);
-      // setCount(prev => prev + 1);
-      setIsClick(true);
-      closeTimeoutRef.current = setTimeout(() => {
-        setIsClick(false);
-      }, 30000)
+      setIntensity(intensity + 0.1);
+      animationStart();
     }}>
       {/* <pointLight distance={10} position={[ x, y - 2.5, z + 1]} intensity={intensity} /> */}
       <pointLight distance={10} position={[ x, y + 5, z + 9]} intensity={intensity} />
