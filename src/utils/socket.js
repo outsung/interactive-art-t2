@@ -4,7 +4,7 @@ import io from "socket.io-client";
 export default class Socket {
   static instance = null;
   static init = () => {
-    Socket.instance = io("http://192.168.219.196:5000", {
+    Socket.instance = io("https://interactive-art-t2-server.herokuapp.com", {
       forceNew: true,
       timeout: 5000,
       transports: ["websocket"],
