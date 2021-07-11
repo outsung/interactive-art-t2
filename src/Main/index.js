@@ -1,12 +1,12 @@
 import React, { Suspense, useRef, useState, useMemo, useEffect, useCallback } from 'react';
 import * as THREE from 'three';
-import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 // import { Stars } from '@react-three/drei';
 import { TextureLoader } from 'three/src/loaders/TextureLoader.js';
 
 import Controls from '../Controls';
 
-import { useSpring, a, useSpringRef, useChain } from "@react-spring/three";
+import { useSpring, a, useSpringRef } from "@react-spring/three";
 
 import { LanternOfGLTF, Effects, useSkybox } from '../App'
 
@@ -128,7 +128,7 @@ function Scene() {
           {Lenterns}
           </AnimationBox>
           <pointLight position={[0, -4, 10]} intensity={1.5} />
-          {useMemo(() => <MainLentern addLenterns={addLenterns} x={-4} y={-2} z={52} />, [])}
+          {useMemo(() => <MainLentern addLenterns={addLenterns} x={-4} y={-2} z={52} />, [addLenterns])}
             
         {/* </Bloom> */}
       </Suspense>
@@ -174,27 +174,27 @@ function MainLentern ({ addLenterns, x, y, z }) {
   const checkPoint1 = useSpringRef();
   const [{ lenternPosition1, cameraPosition1 }, checkPointAPI1] = useSpring(() => ({
     lenternPosition1: [0, 0, 0],
-    cameraPosition1: [0, 0, 0],
+    cameraPosition1: [0, 0],
     ref: checkPoint1,
   }));
   const checkPoint2 = useSpringRef();
   const [{ lenternPosition2, cameraPosition2, cameraLookAt2 }, checkPointAPI2] = useSpring(() => ({
     lenternPosition2: [0, 0, 0],
-    cameraPosition2: [0, 0, 0],
-    cameraLookAt2: [0, 0, 0],
+    cameraPosition2: [0, 0],
+    cameraLookAt2: [0],
     ref: checkPoint2,
   }));
   const checkPoint3 = useSpringRef();
   const [{ lenternPosition3, cameraPosition3, cameraLookAt3 }, checkPointAPI3] = useSpring(() => ({
     lenternPosition3: [0, 0, 0],
-    cameraPosition3: [0, 0, 0],
-    cameraLookAt3: [0, 0, 0],
+    cameraPosition3: [0, 0],
+    cameraLookAt3: [0],
     ref: checkPoint3,
   }));
   const checkPoint4 = useSpringRef();
   const [{ cameraPosition4, cameraLookAt4 }, checkPointAPI4] = useSpring(() => ({
-    cameraPosition4: [0, 0, 0],
-    cameraLookAt4: [0, 0, 0],
+    cameraPosition4: [0, 0],
+    cameraLookAt4: [0],
     ref: checkPoint4,
   }));
   const checkPoint5 = useSpringRef();
@@ -216,15 +216,15 @@ function MainLentern ({ addLenterns, x, y, z }) {
     const [l_x5, l_y5, l_z5] = lenternPosition5.get();
     const [l_x6, l_y6, l_z6] = lenternPosition6.get();
     
-    const [c_x1, c_y1, c_z1] = cameraPosition1.get();
-    const [c_x2, c_y2, c_z2] = cameraPosition2.get();
-    const [c_x3, c_y3, c_z3] = cameraPosition3.get();
-    const [c_x4, c_y4, c_z4] = cameraPosition4.get();
+    const [c_x1, c_y1] = cameraPosition1.get();
+    const [c_x2, c_y2] = cameraPosition2.get();
+    const [c_x3, c_y3] = cameraPosition3.get();
+    const [c_x4, c_y4] = cameraPosition4.get();
     
 
-    const [cl_x2, cl_y2, cl_z2] = cameraLookAt2.get();
-    const [cl_x3, cl_y3, cl_z3] = cameraLookAt3.get();
-    const [cl_x4, cl_y4, cl_z4] = cameraLookAt4.get();
+    const [cl_y2] = cameraLookAt2.get();
+    const [cl_y3] = cameraLookAt3.get();
+    const [cl_y4] = cameraLookAt4.get();
 
     const cameraX = c_x1 + c_x2 + c_x3 + c_x4;
     const cameraY = c_y1 + c_y2 + c_y3 + c_y4;
@@ -328,7 +328,7 @@ function MainLentern ({ addLenterns, x, y, z }) {
       lenternPosition6: [0, 0, 0],
       config: { duration: 1 },
     });
-    
+
     addLenterns();
   }
 
@@ -341,7 +341,7 @@ function MainLentern ({ addLenterns, x, y, z }) {
       {/* <pointLight distance={10} position={[ x, y - 2.5, z + 1]} intensity={intensity} /> */}
       <pointLight distance={10} position={[ x, y + 5, z + 9]} intensity={intensity} />
       <pointLight position={[ x, y - 2.5, z + 3]} intensity={0.6} />
-      {useMemo(() => <LanternOfGLTF x={x} y={y} z={z} url="./lantern.glb"/>, [])}
+      {useMemo(() => <LanternOfGLTF x={x} y={y} z={z} url="./lantern.glb"/>, [x, y, z])}
     </mesh>
   )
 }
