@@ -1,12 +1,12 @@
-import React, { Suspense, useRef, useState, useMemo } from 'react';
-// import * as THREE from 'three';
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+import React, { Suspense, useRef, useState, useMemo, useEffect, useCallback } from 'react';
+import * as THREE from 'three';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 // import { Stars } from '@react-three/drei';
 import { TextureLoader } from 'three/src/loaders/TextureLoader.js';
 
 import Controls from '../Controls';
 
-import { useSpring, a } from "@react-spring/three";
+import { useSpring, a, useSpringRef, useChain } from "@react-spring/three";
 
 import { LanternOfGLTF, Effects, useSkybox } from '../App'
 
@@ -104,12 +104,19 @@ function AnimationBox({ d, t, children }) {
 //     );
 // }
 
+const getLenterns = () => {
+  return <LanternOfGLTF x={Math.floor(Math.random() * 100)} y={Math.floor(Math.random() * 30)} z={Math.floor(Math.random() * 100 - 50)} url="./lantern.glb"/>
+}
 
 function Scene() {
-  const [count, setCount] = useState(3);
-  
+  const [Lenterns, setLenterns] = useState([getLenterns(), getLenterns(), getLenterns()]);
+
+  const addLenterns = useCallback(() => {
+    setLenterns(prev => [...prev, getLenterns()]);
+  }, []);
+
   useSkybox();
-  
+
   return (
     <>
       <pointLight position={[0, -10, 0]} intensity={1.5} />
@@ -118,15 +125,10 @@ function Scene() {
 
         {/* <Bloom f={3}> */}
           <AnimationBox  t={3000} d={0.1}>
-            {
-              // x = -50 ~ 50, y = -30 ~ 30, z = 5 ~ 1
-              Array.from(new Array(count)).map(() => {
-                return <LanternOfGLTF x={Math.floor(Math.random() * 100 - 50)} y={Math.floor(Math.random() * 30)} z={Math.floor(Math.random() * 10 + 1)} url="./lantern.glb"/>
-              })
-            }
+          {Lenterns}
           </AnimationBox>
           <pointLight position={[0, -4, 10]} intensity={1.5} />
-          <MainLentern setCount={setCount} x={0} y={-1.5} z={52} />
+          {useMemo(() => <MainLentern addLenterns={addLenterns} x={-4} y={-2} z={52} />, [])}
             
         {/* </Bloom> */}
       </Suspense>
@@ -153,19 +155,193 @@ export default function Main (){
   );    
 };
 
-function MainLentern ({ setCount, x, y, z }) {
+function easeInSine(x) {
+  return 1 - Math.cos((x * Math.PI) / 2);
+}
+function easeOutSine(x) {
+  return Math.sin((x * Math.PI) / 2);
+}
+function easeInOutSine(x) {
+  return -(Math.cos(Math.PI * x) - 1) / 2;
+}
+
+function MainLentern ({ addLenterns, x, y, z }) {
   const [intensity, setIntensity] = useState(0);
-  
+  const ref = useRef();
+  const closeTimeoutRef = useRef([]);
+
+
+  const checkPoint1 = useSpringRef();
+  const [{ lenternPosition1, cameraPosition1 }, checkPointAPI1] = useSpring(() => ({
+    lenternPosition1: [0, 0, 0],
+    cameraPosition1: [0, 0, 0],
+    ref: checkPoint1,
+  }));
+  const checkPoint2 = useSpringRef();
+  const [{ lenternPosition2, cameraPosition2, cameraLookAt2 }, checkPointAPI2] = useSpring(() => ({
+    lenternPosition2: [0, 0, 0],
+    cameraPosition2: [0, 0, 0],
+    cameraLookAt2: [0, 0, 0],
+    ref: checkPoint2,
+  }));
+  const checkPoint3 = useSpringRef();
+  const [{ lenternPosition3, cameraPosition3, cameraLookAt3 }, checkPointAPI3] = useSpring(() => ({
+    lenternPosition3: [0, 0, 0],
+    cameraPosition3: [0, 0, 0],
+    cameraLookAt3: [0, 0, 0],
+    ref: checkPoint3,
+  }));
+  const checkPoint4 = useSpringRef();
+  const [{ cameraPosition4, cameraLookAt4 }, checkPointAPI4] = useSpring(() => ({
+    cameraPosition4: [0, 0, 0],
+    cameraLookAt4: [0, 0, 0],
+    ref: checkPoint4,
+  }));
+  const checkPoint5 = useSpringRef();
+  const [{ lenternPosition5 }, checkPointAPI5] = useSpring(() => ({
+    lenternPosition5: [0, 0, 0],
+    ref: checkPoint5,
+  }));
+  const checkPoint6 = useSpringRef();
+  const [{ lenternPosition6 }, checkPointAPI6] = useSpring(() => ({
+    lenternPosition6: [0, 0, 0],
+    ref: checkPoint6,
+  }));
+    
+  useFrame((state) => {
+    // x =  y={-2} z={52
+    const [l_x1, l_y1, l_z1] = lenternPosition1.get();
+    const [l_x2, l_y2, l_z2] = lenternPosition2.get();
+    const [l_x3, l_y3, l_z3] = lenternPosition3.get();
+    const [l_x5, l_y5, l_z5] = lenternPosition5.get();
+    const [l_x6, l_y6, l_z6] = lenternPosition6.get();
+    
+    const [c_x1, c_y1, c_z1] = cameraPosition1.get();
+    const [c_x2, c_y2, c_z2] = cameraPosition2.get();
+    const [c_x3, c_y3, c_z3] = cameraPosition3.get();
+    const [c_x4, c_y4, c_z4] = cameraPosition4.get();
+    
+
+    const [cl_x2, cl_y2, cl_z2] = cameraLookAt2.get();
+    const [cl_x3, cl_y3, cl_z3] = cameraLookAt3.get();
+    const [cl_x4, cl_y4, cl_z4] = cameraLookAt4.get();
+
+    const cameraX = c_x1 + c_x2 + c_x3 + c_x4;
+    const cameraY = c_y1 + c_y2 + c_y3 + c_y4;
+    state.camera.lookAt(new THREE.Vector3(cameraX, cameraY + cl_y2 + cl_y3 + cl_y4, 0));
+    state.camera.position.x = cameraX;
+    state.camera.position.y = cameraY;
+
+    ref.current.position.x = l_x1 + l_x2 + l_x3 + l_x5 + l_x6;
+    ref.current.position.y = l_y1 + l_y2 + l_y3 + l_y5 + l_y6;
+    ref.current.position.z = l_z1 + l_z2 + l_z3 + l_z5 + l_z6;
+  });
+
+  useEffect(() => () => {
+    closeTimeoutRef.current.map(close => close && close.current());
+  }, [])
+
+  const animationStart = async () => {
+    // useChain([checkPoint1, checkPoint2, checkPoint3, checkPoint4, checkPoint5, checkPoint6], [0, 7, 12, 19, 22, 24]);
+
+    checkPointAPI1(() => ({
+      lenternPosition1: [30, 27, -5],
+      cameraPosition1: [20, 23, 0],
+      config: { duration: 7000, easing: easeInSine },
+    }));
+    closeTimeoutRef.current[0] = setTimeout(() => {
+      checkPointAPI2({
+        lenternPosition2: [15, 12, -15],
+        cameraPosition2: [2, 5, 0],
+        cameraLookAt2: [0, 3, 0],
+        config: { duration: 5000 },
+      });
+    }, 7000);
+    closeTimeoutRef.current[1] = setTimeout(() => {
+      checkPointAPI3({
+        lenternPosition3: [19, 14, -20],
+        cameraPosition3: [0, 0, 0],
+        cameraLookAt3: [0, 2, 0],
+        config: { duration: 5000, easing: easeOutSine },
+      });
+    }, 12000);
+    closeTimeoutRef.current[2] = setTimeout(() => {
+      checkPointAPI4({
+        cameraPosition4: [-22, -28, 0],
+        cameraLookAt4: [0, -5, 0],
+        config: { duration: 7000, easing: easeInOutSine },
+      });
+    }, 19000);
+    closeTimeoutRef.current[3] = setTimeout(() => {
+      // x : 30 + 15 + 19 = 64
+      // y : 27 + 12 + 14 = 53
+      // z : -5 + -15 + -20 = 40
+      checkPointAPI5({
+        lenternPosition5: [-64, -58, 30],
+        config: { duration: 1 },
+      });
+    }, 22000);
+    closeTimeoutRef.current[4] = setTimeout(() => {
+      checkPointAPI6({
+        lenternPosition6: [0, 5, 10],
+        config: { duration: 5000, easing: easeInOutSine },
+      });
+    }, 24000);
+    
+    closeTimeoutRef.current[5] = setTimeout(() => {
+      animationReset();
+    }, 30000)
+  }
+
+  const animationReset = async () => {
+    checkPointAPI1(() => ({
+      lenternPosition1: [0, 0, 0],
+      cameraPosition1: [0, 0, 0],
+      config: { duration: 1 },
+    }));
+    checkPointAPI2({
+      lenternPosition2: [0, 0, 0],
+      cameraPosition2: [0, 0, 0],
+      cameraLookAt2: [0, 0, 0],
+      config: { duration: 1 },
+    });
+    checkPointAPI3({
+      lenternPosition3: [0, 0, 0],
+      cameraPosition3: [0, 0, 0],
+      cameraLookAt3: [0, 0, 0],
+      config: { duration: 1 },
+    });
+    checkPointAPI4({
+      cameraPosition4: [0, 0, 0],
+      cameraLookAt4: [0, 0, 0],
+      config: { duration: 1 },
+    });
+    
+    // x : 30 + 15 + 19 = 64
+    // y : 27 + 12 + 14 = 53
+    // z : -5 + -15 + -20 = 40
+    checkPointAPI5({
+      lenternPosition5: [0, 0, 0],
+      config: { duration: 1 },
+    });
+    checkPointAPI6({
+      lenternPosition6: [0, 0, 0],
+      config: { duration: 1 },
+    });
+    
+    addLenterns();
+  }
+
+
   return (
-    <mesh onClick={() => {
+    <mesh ref={ref} onClick={() => {
       setIntensity(intensity + 0.1);
-      setCount(prev => prev + 1);
-      console.log("click");
+      animationStart();
     }}>
       {/* <pointLight distance={10} position={[ x, y - 2.5, z + 1]} intensity={intensity} /> */}
       <pointLight distance={10} position={[ x, y + 5, z + 9]} intensity={intensity} />
       <pointLight position={[ x, y - 2.5, z + 3]} intensity={0.6} />
-      {useMemo(() => <LanternOfGLTF x={0} y={-1.5} z={52} url="./lantern.glb"/>, [])}
+      {useMemo(() => <LanternOfGLTF x={x} y={y} z={z} url="./lantern.glb"/>, [])}
     </mesh>
   )
 }
