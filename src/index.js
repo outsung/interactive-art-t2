@@ -2,15 +2,26 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
-// import Main from './Main';
+import Camera from "./Camera";
+
+import Main from "./Main";
 import reportWebVitals from "./reportWebVitals";
 
+import { Router, Switch, Route } from "react-router-dom";
+
 import Socket from "./utils/socket";
+import history from "./utils/browserHistory";
 
 Socket.init();
 
 ReactDOM.render(
-  <App />,
+  <Router history={history}>
+    <Switch>
+      <Route exact path="/" component={App} />
+      <Route exact path="/main" component={Main} />
+      <Route exact path="/camera" component={Camera} />
+    </Switch>
+  </Router>,
   // <Main />,
   document.getElementById("root")
 );

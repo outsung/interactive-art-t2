@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo } from 'react';
-import * as THREE from 'three';
-import { Canvas, useThree } from '@react-three/fiber';
-import { Html, useProgress, useGLTF } from '@react-three/drei';
+import React, { useEffect, useMemo } from "react";
+import * as THREE from "three";
+import { Canvas, useThree } from "@react-three/fiber";
+import { Html, useProgress, useGLTF } from "@react-three/drei";
 
 // import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 // import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader'
@@ -9,48 +9,55 @@ import { Html, useProgress, useGLTF } from '@react-three/drei';
 // import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
 // import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
 
-import { EffectComposer, Bloom, /*DepthOfField,*/Noise, Vignette, SelectiveBloom } from '@react-three/postprocessing'
-import { /*BlurPass, */Resizer, KernelSize } from 'postprocessing'
+import {
+  EffectComposer,
+  Bloom,
+  /*DepthOfField,*/ Noise,
+  Vignette,
+  SelectiveBloom,
+} from "@react-three/postprocessing";
+import { /*BlurPass, */ Resizer, KernelSize } from "postprocessing";
 
-import Controls from './Controls';
+import Controls from "./Controls";
 
+import Model from "./Main";
 
-import Model from './Main'
+export function LanternOfGLTF({ x, y, z, url }) {
+  const { scene } = useGLTF(url);
+  const copiedScene = useMemo(() => scene.clone(), [scene]);
+  console.log(copiedScene);
 
-export function LanternOfGLTF ({x, y, z, url}) {
-  const {scene} = useGLTF(url);
-  const copiedScene = useMemo(() => scene.clone(), [scene])
-  console.log(copiedScene)
-
-  return copiedScene ? <group position={[x,y,z]} scale={0.005}>
-    <primitive object={copiedScene}/>
-  </group> : null
+  return copiedScene ? (
+    <group position={[x, y, z]} scale={0.005}>
+      <primitive object={copiedScene} />
+    </group>
+  ) : null;
 }
 
 export function Loader() {
-  const { progress } = useProgress()
-  return <Html center>{progress} % loaded</Html>
+  const { progress } = useProgress();
+  return <Html center>{progress} % loaded</Html>;
 }
 
-const path = './Skybox/nightsky_';
-const images = ['lf', 'rt', 'up', 'dn', 'ft', 'bk'];
-const ext = '.png';
-const imagePaths = images.map(img => path + img + ext);
+const path = "./Skybox/nightsky_";
+const images = ["lf", "rt", "up", "dn", "ft", "bk"];
+const ext = ".png";
+const imagePaths = images.map((img) => path + img + ext);
 
 export const useSkybox = () => {
   const { scene } = useThree();
 
   useEffect(() => {
-    const loader = new THREE.CubeTextureLoader()
-    const mat = loader.load(imagePaths)
-    scene.background = mat
-    scene.environment = mat
-  }, [scene])
+    const loader = new THREE.CubeTextureLoader();
+    const mat = loader.load(imagePaths);
+    scene.background = mat;
+    scene.environment = mat;
+  }, [scene]);
 
-  return null
-}
+  return null;
+};
 
-export function SelectiveEffects({lightsRefs, meshRefs}){
+export function SelectiveEffects({ lightsRefs, meshRefs }) {
   return (
     <SelectiveBloom
       lights={lightsRefs} // ⚠️ REQUIRED! all relevant lights
@@ -64,9 +71,8 @@ export function SelectiveEffects({lightsRefs, meshRefs}){
       luminanceThreshold={0.9} // luminance threshold. Raise this value to mask out darker elements in the scene.
       luminanceSmoothing={0.025} // smoothness of the luminance threshold. Range is [0, 1]
     />
-  )
+  );
 }
-
 
 export function Effects() {
   // const AO = { samples: 3, luminanceInfluence: 0.6, radius: 2, intensity: 5 }
@@ -85,8 +91,8 @@ export function Effects() {
       />
       <Noise opacity={0.02} />
       <Vignette eskil={false} offset={0.1} />
-  </EffectComposer>
-  )
+    </EffectComposer>
+  );
 }
 
 function Scene() {
@@ -94,13 +100,11 @@ function Scene() {
   return null;
 }
 
-export default function App (){
-  
-
-  return(
+export default function App() {
+  return (
     <>
       <Model />
-      <div style={{position:'absolute', width: "100%", height: "100%"}}>
+      <div style={{ position: "absolute", width: "100%", height: "100%" }}>
         <Canvas
           translate={true}
           colorManagement
@@ -113,5 +117,5 @@ export default function App (){
         </Canvas>
       </div>
     </>
-  );    
-};
+  );
+}
