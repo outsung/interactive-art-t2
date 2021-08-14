@@ -23,7 +23,7 @@ import Controls from "./Controls";
 import Model from "./Main";
 
 export function LanternOfGLTF({ x, y, z, url }) {
-  const { scene } = useGLTF(url);
+  const { scene } = useGLTF(process.env.PUBLIC_URL + url);
   const copiedScene = useMemo(() => scene.clone(), [scene]);
   console.log(copiedScene);
 
@@ -39,10 +39,12 @@ export function Loader() {
   return <Html center>{progress} % loaded</Html>;
 }
 
-const path = "./Skybox/nightsky_";
+const path = "/Skybox/nightsky_";
 const images = ["lf", "rt", "up", "dn", "ft", "bk"];
 const ext = ".png";
-const imagePaths = images.map((img) => path + img + ext);
+const imagePaths = images.map(
+  (img) => process.env.PUBLIC_URL + path + img + ext
+);
 
 export const useSkybox = () => {
   const { scene } = useThree();

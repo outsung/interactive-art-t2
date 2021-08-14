@@ -113,7 +113,7 @@ const getLenterns = () => {
       x={Math.floor(Math.random() * 100)}
       y={Math.floor(Math.random() * 30)}
       z={Math.floor(Math.random() * 100 - 50)}
-      url="./lantern.glb"
+      url="/lantern.glb"
     />
   );
 };
@@ -418,7 +418,7 @@ function MainLentern({ addLenterns, x, y, z }) {
       <pointLight position={[x, y - 2.5, z + 3]} intensity={0.6} />
       {useMemo(
         () => (
-          <LanternOfGLTF x={x} y={y} z={z} url="./lantern.glb" />
+          <LanternOfGLTF x={x} y={y} z={z} url="/lantern.glb" />
         ),
         [x, y, z]
       )}

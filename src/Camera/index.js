@@ -5,6 +5,8 @@ import "@tensorflow/tfjs-backend-webgl";
 import "@tensorflow/tfjs";
 import * as cocoSSD from "@tensorflow-models/coco-ssd";
 
+import Socket from "../utils/socket";
+
 export default function Camera() {
   const [model, setModel] = useState(null);
   const animationFrameRef = useRef(null);
@@ -135,6 +137,12 @@ export default function Camera() {
 
     return false;
   };
+
+  useEffect(() => {
+    if (Socket.instance) {
+      Socket.instance.emit("animationStart");
+    }
+  }, [isDetected]);
 
   useEffect(() => {
     if (model) {
