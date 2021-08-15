@@ -7,13 +7,7 @@ import React, {
   useCallback,
 } from "react";
 import * as THREE from "three";
-import {
-  Canvas,
-  useFrame,
-  useLoader,
-  useThree,
-  extend,
-} from "@react-three/fiber";
+import { Canvas, useFrame, useLoader, extend } from "@react-three/fiber";
 // import { Stars } from '@react-three/drei';
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
 import { Water } from "three-stdlib";
@@ -25,7 +19,6 @@ import { useSpring, a, useSpringRef } from "@react-spring/three";
 import { LanternOfGLTF, Effects, useSkybox } from "../App";
 import { Ocean } from "../Ocean";
 
-import perlin from "../utils/perlin";
 import Socket from "../utils/socket";
 
 // function MainBox(){
@@ -37,10 +30,6 @@ import Socket from "../utils/socket";
 //         <a.go  />
 //     );
 // }
-
-import VectorField from "vector-field";
-
-import SimplexNoise from "simplex-noise";
 
 extend({ Water });
 
@@ -158,9 +147,9 @@ function Scene() {
         <pointLight position={[0, -4, 10]} intensity={1.5} />
         {useMemo(
           () => (
-            <MainLentern addLenterns={() => {}} x={-4} y={-2} z={52} />
+            <MainLentern addLenterns={addLenterns} x={-4} y={-2} z={52} />
           ),
-          []
+          [addLenterns]
         )}
 
         {/* </Bloom> */}

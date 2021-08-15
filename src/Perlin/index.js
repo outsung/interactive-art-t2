@@ -1,8 +1,8 @@
-import React, { useRef, useMemo } from "react";
+import React, { useRef } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
 
-import { makeNoise3D } from "fast-simplex-noise";
+// import { makeNoise3D } from "fast-simplex-noise";
 import Controls from "../Controls";
 import perlinNoise3d from "perlin-noise-3d";
 
@@ -15,11 +15,11 @@ function Scene() {
     z: 10,
   };
   const _increment = 6.18;
-  const _offset = {
-    x: 10,
-    y: 10,
-    z: 10,
-  };
+  //   const _offset = {
+  //     x: 10,
+  //     y: 10,
+  //     z: 10,
+  //   };
 
   const arrowHelperRefs = useRef(
     Array.from(Array(_gridSize.x)).map((d, x) => {
