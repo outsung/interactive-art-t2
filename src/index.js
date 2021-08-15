@@ -3,6 +3,8 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import Camera from "./Camera";
+import Ocean from "./Ocean";
+import Perlin from "./Perlin";
 
 import Main from "./Main";
 import reportWebVitals from "./reportWebVitals";
@@ -20,6 +22,8 @@ ReactDOM.render(
       <Route exact path="/" component={App} />
       <Route exact path="/main" component={Main} />
       <Route exact path="/camera" component={Camera} />
+      <Route exact path="/ocean" component={Ocean} />
+      <Route exact path="/perlin" component={Perlin} />
     </Switch>
   </Router>,
   // <Main />,

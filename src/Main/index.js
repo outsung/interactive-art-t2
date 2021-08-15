@@ -7,17 +7,42 @@ import React, {
   useCallback,
 } from "react";
 import * as THREE from "three";
-import { Canvas, useFrame, useLoader } from "@react-three/fiber";
+import {
+  Canvas,
+  useFrame,
+  useLoader,
+  useThree,
+  extend,
+} from "@react-three/fiber";
 // import { Stars } from '@react-three/drei';
 import { TextureLoader } from "three/src/loaders/TextureLoader.js";
+import { Water } from "three-stdlib";
 
 import Controls from "../Controls";
 
 import { useSpring, a, useSpringRef } from "@react-spring/three";
 
 import { LanternOfGLTF, Effects, useSkybox } from "../App";
+import { Ocean } from "../Ocean";
 
+import perlin from "../utils/perlin";
 import Socket from "../utils/socket";
+
+// function MainBox(){
+//     const mesh = useRef();
+//     // useFrame(() => (mesh.current.rotation.x = mesh.current.rotation.y += 0.01));
+//     const [expand, setExpand] = useState(false);
+
+//     return (
+//         <a.go  />
+//     );
+// }
+
+import VectorField from "vector-field";
+
+import SimplexNoise from "simplex-noise";
+
+extend({ Water });
 
 export const Background = () => {
   const texture = useLoader(TextureLoader, "./background.jpg");
@@ -97,20 +122,10 @@ function AnimationBox({ d, t, children }) {
   );
 }
 
-// function MainBox(){
-//     const mesh = useRef();
-//     // useFrame(() => (mesh.current.rotation.x = mesh.current.rotation.y += 0.01));
-//     const [expand, setExpand] = useState(false);
-
-//     return (
-//         <a.go  />
-//     );
-// }
-
-const getLenterns = () => {
+const GetLenterns = () => {
   return (
     <LanternOfGLTF
-      x={Math.floor(Math.random() * 100)}
+      x={Math.floor(Math.random() * 200 - 100)}
       y={Math.floor(Math.random() * 30)}
       z={Math.floor(Math.random() * 100 - 50)}
       url="/lantern.glb"
@@ -119,14 +134,12 @@ const getLenterns = () => {
 };
 
 function Scene() {
-  const [Lenterns, setLenterns] = useState([
-    getLenterns(),
-    getLenterns(),
-    getLenterns(),
-  ]);
+  const [Lenterns, setLenterns] = useState(
+    Array.from(Array(100)).map((d, i) => <GetLenterns key={i} />)
+  );
 
   const addLenterns = useCallback(() => {
-    setLenterns((prev) => [...prev, getLenterns()]);
+    setLenterns((prev) => [...prev, <GetLenterns key={prev.length + 1} />]);
   }, []);
 
   useSkybox();
@@ -136,6 +149,8 @@ function Scene() {
       <pointLight position={[0, -10, 0]} intensity={1.5} />
       <Effects />
       <Suspense fallback={<></>}>
+        <Ocean />
+
         {/* <Bloom f={3}> */}
         <AnimationBox t={3000} d={0.1}>
           {Lenterns}
@@ -143,9 +158,9 @@ function Scene() {
         <pointLight position={[0, -4, 10]} intensity={1.5} />
         {useMemo(
           () => (
-            <MainLentern addLenterns={addLenterns} x={-4} y={-2} z={52} />
+            <MainLentern addLenterns={() => {}} x={-4} y={-2} z={52} />
           ),
-          [addLenterns]
+          []
         )}
 
         {/* </Bloom> */}
@@ -169,7 +184,7 @@ export default function Main() {
         onCreated={(state) => state.gl.setClearColor(0xffffff, 0)}
         colorManagement
         shadowMap
-        camera={{ position: [0, 0, 60], fov: 60 }}
+        camera={{ position: [0, 0, 70], fov: 60 }}
       >
         <Scene />
         <Controls />
@@ -400,6 +415,9 @@ function MainLentern({ addLenterns, x, y, z }) {
     });
   }, [onClick]);
 
+  const onEnter = useCallback(() => {
+    setIntensity(intensity + 0.1);
+  }, [intensity]);
   useEffect(
     () => () => {
       closeTimeoutRef.current.map((close) => close && close.current());
@@ -408,13 +426,33 @@ function MainLentern({ addLenterns, x, y, z }) {
   );
 
   return (
-    <mesh ref={ref} onClick={onClick}>
+    <mesh ref={ref} onPointerEnter={onEnter} onClick={onClick}>
       {/* <pointLight distance={10} position={[ x, y - 2.5, z + 1]} intensity={intensity} /> */}
       <pointLight
         distance={10}
-        position={[x, y + 5, z + 9]}
+        position={[x + 5, y, z - 4]}
         intensity={intensity}
+        color="#FFE97A"
       />
+      <pointLight
+        distance={10}
+        position={[x - 5, y, z + 1]}
+        intensity={intensity}
+        color="#FFE97A"
+      />
+      <pointLight
+        distance={10}
+        position={[x, y, z + 9]}
+        intensity={intensity}
+        color="#FFE97A"
+      />
+      <pointLight
+        distance={10}
+        position={[x + 5, y, z + 6]}
+        intensity={intensity}
+        color="#FFE97A"
+      />
+
       <pointLight position={[x, y - 2.5, z + 3]} intensity={0.6} />
       {useMemo(
         () => (

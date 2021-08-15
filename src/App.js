@@ -12,9 +12,11 @@ import { Html, useProgress, useGLTF } from "@react-three/drei";
 import {
   EffectComposer,
   Bloom,
-  /*DepthOfField,*/ Noise,
+  DepthOfField,
+  Noise,
   Vignette,
   SelectiveBloom,
+  BrightnessContrast,
 } from "@react-three/postprocessing";
 import { /*BlurPass, */ Resizer, KernelSize } from "postprocessing";
 
@@ -22,17 +24,17 @@ import Controls from "./Controls";
 
 import Model from "./Main";
 
-export function LanternOfGLTF({ x, y, z, url }) {
+export const LanternOfGLTF = React.forwardRef(({ x, y, z, url }, ref) => {
   const { scene } = useGLTF(process.env.PUBLIC_URL + url);
   const copiedScene = useMemo(() => scene.clone(), [scene]);
   console.log(copiedScene);
 
   return copiedScene ? (
-    <group position={[x, y, z]} scale={0.005}>
+    <group ref={ref} position={[x, y, z]} scale={0.005}>
       <primitive object={copiedScene} />
     </group>
   ) : null;
-}
+});
 
 export function Loader() {
   const { progress } = useProgress();
@@ -53,7 +55,7 @@ export const useSkybox = () => {
     const loader = new THREE.CubeTextureLoader();
     const mat = loader.load(imagePaths);
     scene.background = mat;
-    scene.environment = mat;
+    // scene.environment = mat;
   }, [scene]);
 
   return null;
@@ -80,19 +82,35 @@ export function Effects() {
   // const AO = { samples: 3, luminanceInfluence: 0.6, radius: 2, intensity: 5 }
   return (
     <EffectComposer>
-      {/* <DepthOfField focusDistance={0} focalLength={0.02} bokehScale={2} height={480} /> */}
-      {/* <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} /> */}
+      <BrightnessContrast
+        brightness={-0.27} // brightness. min: -1, max: 1
+        contrast={-0.3} // contrast: min -1, max: 1
+      />
+      <DepthOfField
+        focusDistance={0.03}
+        focalLength={0.07}
+        bokehScale={4}
+        height={480}
+      />
       <Bloom
         intensity={1.0} // The bloom intensity.
         blurPass={undefined} // A blur pass.
         width={Resizer.AUTO_SIZE} // render width
         height={Resizer.AUTO_SIZE} // render height
         kernelSize={KernelSize.LARGE} // blur kernel size
-        luminanceThreshold={0} // luminance threshold. Raise this value to mask out darker elements in the scene.
+        luminanceThreshold={0.1} // luminance threshold. Raise this value to mask out darker elements in the scene.
         luminanceSmoothing={0.025} // smoothness of the luminance threshold. Range is [0, 1]
       />
       <Noise opacity={0.02} />
       <Vignette eskil={false} offset={0.1} />
+
+      {/* <Noise opacity={0.02} /> */}
+      {/* // <EffectComposer> */}
+      {/* <DepthOfField focusDistance={0} focalLength={0.02} bokehScale={2} height={480} /> */}
+      {/* <Bloom luminanceThreshold={0} luminanceSmoothing={0.9} height={300} /> */}
+
+      {/* <Vignette eskil={false} offset={0.1} /> */}
+      {/* </EffectComposer> */}
     </EffectComposer>
   );
 }
