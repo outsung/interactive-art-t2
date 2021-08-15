@@ -35,7 +35,7 @@ export function Ocean() {
       fog: false,
       format: gl.encoding,
     }),
-    [waterNormals]
+    [gl.encoding, waterNormals]
   );
   useFrame(
     (state, delta) => (ref.current.material.uniforms.time.value += delta)
