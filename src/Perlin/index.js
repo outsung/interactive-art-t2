@@ -15,17 +15,18 @@ function clamp(value, min, max) {
 
 function Scene() {
   const _gridSize = {
-    x: 20,
-    y: 20,
-    z: 20,
+    x: 50,
+    y: 50,
+    z: 1,
   };
-  const _increment = 0.06;
+  const _increment = 0.1;
   const _offset = {
     x: 0,
     y: 0,
     z: 0,
   };
 
+  const _arrowScale = 1;
   const arrowHelperRefs = useRef(
     Array.from(Array(_gridSize.x)).map((d, x) => {
       return Array.from(Array(_gridSize.y)).map((d, y) => {
@@ -37,9 +38,9 @@ function Scene() {
   );
 
   const _amountOfParticles = 1000;
-  const _particleScale = 1;
-  const _particleMoveSpeed = 5;
-  const _particleRotationSpeed = 0.2;
+  const _particleScale = 0.5;
+  const _particleMoveSpeed = 2;
+  const _particleRotationSpeed = 0.5;
   const particleRef = useRef(
     Array.from(Array(_amountOfParticles)).map(() => null)
   );
@@ -48,9 +49,9 @@ function Scene() {
     () =>
       Array.from(Array(_amountOfParticles)).map((d, z) => {
         return new THREE.Vector3(
-          rand(0, _gridSize.x * 5),
-          rand(0, _gridSize.y * 5),
-          rand(0, _gridSize.z * 5)
+          rand(0, _gridSize.x * _arrowScale),
+          rand(0, _gridSize.y * _arrowScale),
+          rand(0, _gridSize.z * _arrowScale)
         );
       }),
     [_gridSize.x, _gridSize.y, _gridSize.z]
@@ -105,25 +106,20 @@ function Scene() {
   const onFrameForParticle = (deltaT) => {
     for (let i = 0; i < _amountOfParticles; i++) {
       applyRotation(particleRef.current[i], deltaT);
-      applyPosition(particleRef.current[i], deltaT);
     }
   };
 
-  const applyPosition = (particleRef, deltaT) => {
-    // particleRef.setPosition(
-    //   new THREE.Vector3(
-    //     x + particleRef.rotation.x * _particleMoveSpeed * deltaT,
-    //     y + particleRef.rotation.y * _particleMoveSpeed * deltaT,
-    //     z + particleRef.rotation.z * _particleMoveSpeed * deltaT
-    //   )
-    // );
-    // console.log(particleRef);
-  };
   const applyRotation = (particleRef, deltaT) => {
     const position = new THREE.Vector3(
-      Math.floor(clamp(particleRef.position.x / 5, 0, _gridSize.x - 1)),
-      Math.floor(clamp(particleRef.position.y / 5, 0, _gridSize.y - 1)),
-      Math.floor(clamp(particleRef.position.z / 5, 0, _gridSize.z - 1))
+      Math.floor(
+        clamp(particleRef.position.x / _arrowScale, 0, _gridSize.x - 1)
+      ),
+      Math.floor(
+        clamp(particleRef.position.y / _arrowScale, 0, _gridSize.y - 1)
+      ),
+      Math.floor(
+        clamp(particleRef.position.z / _arrowScale, 0, _gridSize.z - 1)
+      )
     );
     // console.log(particleRef.position, position);
     const arrowHelperRef =
@@ -148,21 +144,21 @@ function Scene() {
       particleRef.rotation.z * _particleMoveSpeed * deltaT;
 
     if (particleRef.position.x < 0) {
-      particleRef.position.x = 100;
+      particleRef.position.x = _gridSize.x * _arrowScale;
     }
     if (particleRef.position.y < 0) {
-      particleRef.position.y = 100;
+      particleRef.position.y = _gridSize.y * _arrowScale;
     }
     if (particleRef.position.z < 0) {
-      particleRef.position.z = 100;
+      particleRef.position.z = _gridSize.z * _arrowScale;
     }
-    if (particleRef.position.x > 100) {
+    if (particleRef.position.x > _gridSize.x * _arrowScale) {
       particleRef.position.x = 0;
     }
-    if (particleRef.position.y > 100) {
+    if (particleRef.position.y > _gridSize.y * _arrowScale) {
       particleRef.position.y = 0;
     }
-    if (particleRef.position.z > 100) {
+    if (particleRef.position.z > _gridSize.z * _arrowScale) {
       particleRef.position.z = 0;
     }
     // quaternion
@@ -210,7 +206,7 @@ function Scene() {
               <arrowHelper
                 key={`${x}-${y}-${z}`}
                 ref={(ref) => (arrowHelperRefs.current[x][y][z] = ref)}
-                position={[x * 5, y * 5, z * 5]}
+                position={[x * _arrowScale, y * _arrowScale, z * _arrowScale]}
                 args={[new THREE.Vector3(0, 0, 0)]}
                 // setLength={(5, 1, 1)}
               />
