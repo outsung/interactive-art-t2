@@ -2,7 +2,7 @@
 
 **Lantern flying with a wish using your voice**
 
-<a href="#"><img src="https://outsung.github.io/interactive-art-t2/image2.jpg" /></a>
+<a href="#"><img src="./public/image2.jpg" /></a>
 
 \
 소원을 말하고 하늘로 풍등을 띄우는 풍등 축제에서 영감을 얻어 제작하게 되었습니다.
