@@ -15,11 +15,11 @@ function clamp(value, min, max) {
 
 function Scene() {
   const _gridSize = {
-    x: 50,
-    y: 50,
-    z: 1,
+    x: 15,
+    y: 15,
+    z: 15,
   };
-  const _increment = 0.1;
+  const _increment = 0.08;
   const _offset = {
     x: 0,
     y: 0,
@@ -38,8 +38,8 @@ function Scene() {
   );
 
   const _amountOfParticles = 1000;
-  const _particleScale = 0.5;
-  const _particleMoveSpeed = 2;
+  const _particleScale = 0.6;
+  const _particleMoveSpeed = 0.5;
   const _particleRotationSpeed = 0.5;
   const particleRef = useRef(
     Array.from(Array(_amountOfParticles)).map(() => null)
@@ -75,7 +75,7 @@ function Scene() {
               xOff + _offset.x,
               yOff + _offset.y,
               zOff + _offset.z,
-              oldT / 10000
+              oldT / 50000
             ) + 1;
           const direction = new THREE.Vector3(
             Math.cos(noise * Math.PI),
